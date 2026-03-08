@@ -38,7 +38,21 @@ let tasks: Task[] = [];
 
 // GET /api/tasks — return all tasks
 app.get("/api/tasks", (_req: Request, res: Response) => {
-  res.json(tasks);
+  const { priority, completed } = _req.query;
+  let filteredTasks = [...tasks];
+
+  if (priority) {
+    filteredTasks = filteredTasks.filter((task) => task.priority === priority);
+  }
+
+  if (completed !== undefined) {
+    const isCompleted = completed === "true";
+    filteredTasks = filteredTasks.filter(
+      (task) => task.completed === isCompleted,
+    );
+  }
+
+  res.json(filteredTasks);
 });
 
 // POST /api/tasks — create a new task
