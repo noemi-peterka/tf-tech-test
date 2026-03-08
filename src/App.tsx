@@ -2,15 +2,18 @@
 // This is your starting point. Build out the UI here.
 // You're welcome to split this into multiple components if you'd like!
 
-import { useState, useEffect } from 'react';
-import { Task } from './types';
-import { getTasks, createTask, updateTask, deleteTask } from './api';
+import { useState, useEffect } from "react";
+import { Task } from "./types";
+import { getTasks, createTask, updateTask, deleteTask } from "./api";
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState<
+    "low" | "medium" | "high"
+  >("medium");
 
   // Fetch tasks on mount
   useEffect(() => {
@@ -19,7 +22,7 @@ function App() {
         const data = await getTasks();
         setTasks(data);
       } catch {
-        setError('Failed to load tasks');
+        setError("Failed to load tasks");
       } finally {
         setLoading(false);
       }
@@ -29,9 +32,13 @@ function App() {
   // TODO: Customise this — add priority, due dates, or anything else you like!
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) return;
-    const task = await createTask({ title: newTaskTitle, completed: false });
+    const task = await createTask({
+      title: newTaskTitle,
+      completed: false,
+      priority: newTaskPriority,
+    });
     setTasks((prev) => [...prev, task]);
-    setNewTaskTitle('');
+    setNewTaskTitle("");
   };
 
   // TODO: Expand this if you add extra fields to update
@@ -47,20 +54,30 @@ function App() {
   };
 
   if (loading) return <p>Loading tasks...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: 24 }}>
+    <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
       <h1>Task Manager</h1>
 
       {/* TODO: Improve this input — add priority, labels, due date, etc. */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
         <input
           type="text"
           value={newTaskTitle}
           onChange={(e) => setNewTaskTitle(e.target.value)}
           placeholder="Add a new task..."
         />
+        <select
+          value={newTaskPriority}
+          onChange={(e) =>
+            setNewTaskPriority(e.target.value as "low" | "medium" | "high")
+          }
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
         <button onClick={handleAddTask}>Add</button>
       </div>
 
@@ -68,14 +85,27 @@ function App() {
       {tasks.length === 0 ? (
         <p>No tasks yet. Add one above!</p>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul style={{ listStyle: "none", padding: 0 }}>
           {tasks.map((task) => (
-            <li key={task.id} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ textDecoration: task.completed ? 'line-through' : 'none', flex: 1 }}>
-                {task.title}
+            <li
+              key={task.id}
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                marginBottom: 8,
+              }}
+            >
+              <span
+                style={{
+                  textDecoration: task.completed ? "line-through" : "none",
+                  flex: 1,
+                }}
+              >
+                {task.title}({task.priority})
               </span>
               <button onClick={() => handleToggleComplete(task)}>
-                {task.completed ? 'Undo' : 'Complete'}
+                {task.completed ? "Undo" : "Complete"}
               </button>
               <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
             </li>
