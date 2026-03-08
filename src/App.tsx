@@ -16,12 +16,26 @@ function App() {
   >("medium");
 
   const [formError, setFormError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "completed"
+  >("all");
+  const [priorityFilter, setPriorityFilter] = useState<
+    "all" | "low" | "medium" | "high"
+  >("all");
 
   // Fetch tasks on mount
   useEffect(() => {
     void (async () => {
       try {
-        const data = await getTasks();
+        setLoading(true);
+        setError(null);
+
+        const completed =
+          statusFilter === "all" ? undefined : statusFilter === "completed";
+
+        const priority = priorityFilter === "all" ? undefined : priorityFilter;
+
+        const data = await getTasks({ completed, priority });
         setTasks(data);
       } catch {
         setError("Failed to load tasks");
@@ -29,7 +43,7 @@ function App() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [statusFilter, priorityFilter]);
 
   // TODO: Customise this — add priority, due dates, or anything else you like!
   const handleAddTask = async () => {
@@ -100,6 +114,32 @@ function App() {
       {formError && <p style={{ color: "red" }}>{formError}</p>}
 
       {/* TODO: Style this list — make it your own! */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value as "all" | "active" | "completed")
+          }
+        >
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+        </select>
+
+        <select
+          value={priorityFilter}
+          onChange={(e) =>
+            setPriorityFilter(
+              e.target.value as "all" | "low" | "medium" | "high",
+            )
+          }
+        >
+          <option value="all">All priorities</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
       {tasks.length === 0 ? (
         <p>No tasks yet. Add one above!</p>
       ) : (
