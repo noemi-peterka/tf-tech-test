@@ -15,6 +15,8 @@ function App() {
     "low" | "medium" | "high"
   >("medium");
 
+  const [formError, setFormError] = useState<string | null>(null);
+
   // Fetch tasks on mount
   useEffect(() => {
     void (async () => {
@@ -31,14 +33,28 @@ function App() {
 
   // TODO: Customise this — add priority, due dates, or anything else you like!
   const handleAddTask = async () => {
-    if (!newTaskTitle.trim()) return;
-    const task = await createTask({
-      title: newTaskTitle,
-      completed: false,
-      priority: newTaskPriority,
-    });
-    setTasks((prev) => [...prev, task]);
-    setNewTaskTitle("");
+    setFormError(null);
+
+    if (!newTaskTitle.trim()) {
+      setFormError("Please enter a task title.");
+      return;
+    }
+
+    try {
+      const task = await createTask({
+        title: newTaskTitle,
+        completed: false,
+        priority: newTaskPriority,
+      });
+
+      setTasks((prev) => [...prev, task]);
+      setNewTaskTitle("");
+      setNewTaskPriority("medium");
+    } catch (err) {
+      setFormError(
+        err instanceof Error ? err.message : "Failed to create task.",
+      );
+    }
   };
 
   // TODO: Expand this if you add extra fields to update
@@ -80,6 +96,8 @@ function App() {
         </select>
         <button onClick={handleAddTask}>Add</button>
       </div>
+
+      {formError && <p style={{ color: "red" }}>{formError}</p>}
 
       {/* TODO: Style this list — make it your own! */}
       {tasks.length === 0 ? (
