@@ -5,6 +5,7 @@
 import { useState, useEffect } from "react";
 import { Task } from "./types";
 import { getTasks, createTask, updateTask, deleteTask } from "./api";
+import "./App.css";
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -87,89 +88,101 @@ function App() {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
-      <h1>Task Manager</h1>
+    <div className="app">
+      <h1 className="app-title">Task Manager</h1>
 
       {/* TODO: Improve this input — add priority, labels, due date, etc. */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        <input
-          type="text"
-          value={newTaskTitle}
-          onChange={(e) => setNewTaskTitle(e.target.value)}
-          placeholder="Add a new task..."
-        />
-        <select
-          value={newTaskPriority}
-          onChange={(e) =>
-            setNewTaskPriority(e.target.value as "low" | "medium" | "high")
-          }
-        >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-        <button onClick={handleAddTask}>Add</button>
+      <div className="card stack">
+        <div className="row">
+          <input
+            className="input"
+            type="text"
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            placeholder="Add a new task..."
+          />
+          <select
+            className="select"
+            value={newTaskPriority}
+            onChange={(e) =>
+              setNewTaskPriority(e.target.value as "low" | "medium" | "high")
+            }
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+          <button className="button" onClick={handleAddTask}>
+            Add
+          </button>
+        </div>
+
+        {formError && <p className="message error">{formError}</p>}
+
+        {/* TODO: Style this list — make it your own! */}
+        <div className="row">
+          <select
+            className="select"
+            value={statusFilter}
+            onChange={(e) =>
+              setStatusFilter(e.target.value as "all" | "active" | "completed")
+            }
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+
+          <select
+            className="select"
+            value={priorityFilter}
+            onChange={(e) =>
+              setPriorityFilter(
+                e.target.value as "all" | "low" | "medium" | "high",
+              )
+            }
+          >
+            <option value="all">All priorities</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        {tasks.length === 0 ? (
+          <p className="empty-state">No tasks yet. Add one above!</p>
+        ) : (
+          <ul className="task-list">
+            {tasks.map((task) => (
+              <li key={task.id} className="task-item">
+                <div className="task-main">
+                  <span
+                    className={`task-title ${task.completed ? "completed" : ""}`}
+                  >
+                    {task.title}
+                  </span>
+                  <span className={`pill ${task.priority}`}>
+                    {task.priority}
+                  </span>
+                </div>
+                <div className="task-actions">
+                  <button
+                    className="button secondary"
+                    onClick={() => handleToggleComplete(task)}
+                  >
+                    {task.completed ? "Undo" : "Complete"}
+                  </button>
+                  <button
+                    className="button danger"
+                    onClick={() => handleDeleteTask(task.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-
-      {formError && <p style={{ color: "red" }}>{formError}</p>}
-
-      {/* TODO: Style this list — make it your own! */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <select
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value as "all" | "active" | "completed")
-          }
-        >
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="completed">Completed</option>
-        </select>
-
-        <select
-          value={priorityFilter}
-          onChange={(e) =>
-            setPriorityFilter(
-              e.target.value as "all" | "low" | "medium" | "high",
-            )
-          }
-        >
-          <option value="all">All priorities</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-      </div>
-      {tasks.length === 0 ? (
-        <p>No tasks yet. Add one above!</p>
-      ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {tasks.map((task) => (
-            <li
-              key={task.id}
-              style={{
-                display: "flex",
-                gap: 8,
-                alignItems: "center",
-                marginBottom: 8,
-              }}
-            >
-              <span
-                style={{
-                  textDecoration: task.completed ? "line-through" : "none",
-                  flex: 1,
-                }}
-              >
-                {task.title}({task.priority})
-              </span>
-              <button onClick={() => handleToggleComplete(task)}>
-                {task.completed ? "Undo" : "Complete"}
-              </button>
-              <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }
